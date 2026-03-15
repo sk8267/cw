@@ -42,7 +42,7 @@ const acrossPicsDiv = document.getElementById("pictureCluesAcross");
 const downPicsDiv = document.getElementById("pictureCluesDown");
 const checkButton = document.getElementById("checkButton");
 
-grid.style.gridTemplateColumns = `repeat(${puzzle[0].length}, 40px)`;
+grid.style.gridTemplateColumns = `repeat(${puzzle[0].length}, 30px)`;
 
 // UTILITY
 function isWhiteCell(r,c){ return r>=0 && r<puzzle.length && c>=0 && c<puzzle[0].length && puzzle[r][c]!=='#'; }
