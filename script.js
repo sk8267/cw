@@ -44,7 +44,7 @@ const checkButton = document.getElementById("checkButton");
 
 grid.style.gridTemplateColumns = `repeat(${puzzle[0].length}, 40px)`;
 
-// UTILITY FUNCTIONS
+// UTILITY
 function isWhiteCell(r,c) {
   return r>=0 && r<puzzle.length && c>=0 && c<puzzle[0].length && puzzle[r][c]!=='#';
 }
@@ -66,7 +66,7 @@ for(let r=0;r<puzzle.length;r++){
   }
 }
 
-// GLOBAL TO TRACK CURRENT WORD
+// GLOBAL
 let currentWord = null;
 
 // BUILD GRID
@@ -102,7 +102,7 @@ for(let r=0;r<puzzle.length;r++){
       moveFocus(input); 
     });
 
-    // FOCUS - highlight entire word, find word start
+    // FOCUS
     input.addEventListener("focus", ()=>{
       const r=parseInt(input.dataset.row);
       const c=parseInt(input.dataset.col);
@@ -127,7 +127,7 @@ for(let r=0;r<puzzle.length;r++){
   }
 }
 
-// SHOW PICTURE CLUES
+// PICTURE CLUES
 function showPictureClues(){
   acrossPicsDiv.innerHTML="";
   downPicsDiv.innerHTML="";
@@ -158,7 +158,7 @@ function showPictureClues(){
 }
 showPictureClues();
 
-// FOCUS WORD WHEN IMAGE CLICKED
+// FOCUS WORD
 function focusClue(r,c,dir){
   currentWord={row:r,col:c,direction:dir};
   highlightWord();
@@ -167,30 +167,41 @@ function focusClue(r,c,dir){
   if(cell) cell.focus();
 }
 
-// MOVE FOCUS ALONG CURRENT WORD AND SKIP FILLED LETTERS
+// MOVE FOCUS (stays in current word)
 function moveFocus(currentInput){
   if(!currentWord) return;
-  let {row:r,col:c,direction:dir}=currentWord;
+  let {row:startR, col:startC, direction:dir} = currentWord;
 
-  r=parseInt(currentInput.dataset.row);
-  c=parseInt(currentInput.dataset.col);
+  let r = parseInt(currentInput.dataset.row);
+  let c = parseInt(currentInput.dataset.col);
 
   while(true){
-    if(dir==="across") c++;
-    else if(dir==="down") r++;
+    if(dir === "across") c++;
+    else if(dir === "down") r++;
     else return;
 
     if(!isWhiteCell(r,c)) return;
 
+    // end of current word
+    if(dir === "across"){
+      if(r!==startR) return;
+      let endC=startC; while(isWhiteCell(startR,endC+1)) endC++;
+      if(c > endC) return;
+    } else {
+      if(c!==startC) return;
+      let endR=startR; while(isWhiteCell(endR+1,startC)) endR++;
+      if(r > endR) return;
+    }
+
     const nextInput = grid.querySelector(`input.cell[data-row='${r}'][data-col='${c}']`);
-    if(nextInput && nextInput.value===""){ // stop at first empty
+    if(nextInput && nextInput.value===""){
       nextInput.focus();
       break;
     }
   }
 }
 
-// HIGHLIGHT ENTIRE ACTIVE WORD
+// HIGHLIGHT WORD
 function highlightWord(){
   document.querySelectorAll(".cell").forEach(cell=>{
     cell.classList.remove("active-word");
@@ -202,25 +213,21 @@ function highlightWord(){
   const cellsToHighlight = [];
 
   if(dir==="across"){
-    let i=0;
-    while(isWhiteCell(r,c+i)){
+    let i=0; while(isWhiteCell(r,c+i)){
       const cell = grid.querySelector(`input.cell[data-row='${r}'][data-col='${c+i}']`);
-      if(cell) cellsToHighlight.push(cell);
-      i++;
+      if(cell) cellsToHighlight.push(cell); i++;
     }
-  } else if(dir==="down"){
-    let i=0;
-    while(isWhiteCell(r+i,c)){
+  } else {
+    let i=0; while(isWhiteCell(r+i,c)){
       const cell = grid.querySelector(`input.cell[data-row='${r+i}'][data-col='${c}']`);
-      if(cell) cellsToHighlight.push(cell);
-      i++;
+      if(cell) cellsToHighlight.push(cell); i++;
     }
   }
 
   cellsToHighlight.forEach(cell=>cell.classList.add("active-word"));
 }
 
-// CHECK ANSWERS
+// CHECK BUTTON
 checkButton.addEventListener("click",()=>{
   const cells=document.querySelectorAll(".cell");
 
@@ -245,8 +252,7 @@ checkButton.addEventListener("click",()=>{
     let solved=true;
 
     if(isStartAcross(r,c)){
-      let i=0;
-      while(isWhiteCell(r,c+i)){
+      let i=0; while(isWhiteCell(r,c+i)){
         const cell=grid.querySelector(`input.cell[data-row='${r}'][data-col='${c+i}']`);
         if(!cell || cell.value.toUpperCase()!==puzzle[r][c+i]) solved=false;
         i++;
@@ -254,8 +260,7 @@ checkButton.addEventListener("click",()=>{
     }
 
     if(isStartDown(r,c)){
-      let i=0;
-      while(isWhiteCell(r+i,c)){
+      let i=0; while(isWhiteCell(r+i,c)){
         const cell=grid.querySelector(`input.cell[data-row='${r+i}'][data-col='${c}']`);
         if(!cell || cell.value.toUpperCase()!==puzzle[r+i][c]) solved=false;
         i++;
