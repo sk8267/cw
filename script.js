@@ -119,7 +119,8 @@ function showPictureClues(){
       const img=document.createElement("img");
       img.src=pictureClues[num];
       img.dataset.num=num;
-      img.addEventListener("click",()=>focusClue(r,c));
+      img.dataset.direction="across";
+      img.addEventListener("click",()=>focusClue(r,c,img.dataset.direction));
       acrossPicsDiv.appendChild(img);
     }
 
@@ -127,7 +128,8 @@ function showPictureClues(){
       const img=document.createElement("img");
       img.src=pictureClues[num];
       img.dataset.num=num;
-      img.addEventListener("click",()=>focusClue(r,c));
+      img.dataset.direction="down";
+      img.addEventListener("click",()=>focusClue(r,c,img.dataset.direction));
       downPicsDiv.appendChild(img);
     }
   });
@@ -135,11 +137,8 @@ function showPictureClues(){
 showPictureClues();
 
 // FOCUS WORD WHEN IMAGE CLICKED
-function focusClue(r,c){
-  let direction = null;
-  if(isStartAcross(r,c)) direction="across";
-  else if(isStartDown(r,c)) direction="down";
-  currentWord={row:r,col:c,direction:direction};
+function focusClue(r,c,dir){
+  currentWord={row:r,col:c,direction:dir};
 
   const cell = grid.querySelector(`input.cell[data-row='${r}'][data-col='${c}']`);
   if(cell) cell.focus();
