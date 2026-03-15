@@ -1,34 +1,57 @@
 /* Page layout */
-
 body {
   font-family: Arial, sans-serif;
   display: flex;
-  justify-content: center;
+  flex-direction: column;
+  align-items: center;
   margin: 20px;
 }
 
 
-/* Container for the whole crossword */
+/* Container for the whole layout: left/right pictures + crossword */
+#crosswordLayout {
+  display: grid;
+  grid-template-columns: auto auto auto; /* Left pictures / crossword / right pictures */
+  align-items: center;
+  justify-content: center;
+  gap: 30px;
+  margin-top: 20px;
+}
 
-#crosswordContainer {
-  text-align: center;
-  transform: scale(0.75);        /* makes the puzzle smaller */
-  transform-origin: top center;
+
+/* Picture clue sections */
+#pictureCluesAcross,
+#pictureCluesDown {
+  display: flex;
+  flex-direction: column;  /* Stack pictures vertically */
+  gap: 10px;
+}
+
+
+/* Picture clues */
+#pictureCluesAcross img,
+#pictureCluesDown img {
+  width: 70px;          /* Adjust picture size */
+  height: auto;
+  cursor: pointer;
+  border: 2px solid transparent;
+}
+
+/* Hover effect for pictures */
+#pictureCluesAcross img:hover,
+#pictureCluesDown img:hover {
+  border: 2px solid #666;
 }
 
 
 /* Crossword grid */
-
 #grid {
   display: grid;
   gap: 2px;
-  justify-content: center;
-  margin: 20px 0;
 }
 
 
 /* Crossword input cells */
-
 .cell {
   width: 30px;
   height: 30px;
@@ -41,7 +64,6 @@ body {
 
 
 /* Black squares */
-
 .block {
   width: 30px;
   height: 30px;
@@ -50,7 +72,6 @@ body {
 
 
 /* Clue numbers inside cells */
-
 .clue-number {
   position: absolute;
   top: 1px;
@@ -60,41 +81,9 @@ body {
 }
 
 
-/* Picture clue sections */
-
-#pictureCluesAcross,
-#pictureCluesDown {
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: center;
-  margin-bottom: 15px;
-}
-
-
-/* Picture clues */
-
-#pictureCluesAcross img,
-#pictureCluesDown img {
-  width: 50px;
-  height: auto;
-  margin: 5px;
-  cursor: pointer;
-  border: 2px solid transparent;
-}
-
-
-/* Hover effect for clues */
-
-#pictureCluesAcross img:hover,
-#pictureCluesDown img:hover {
-  border: 2px solid #666;
-}
-
-
 /* Check button */
-
 #controls {
-  margin-top: 10px;
+  margin-top: 15px;
 }
 
 #checkButton {
