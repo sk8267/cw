@@ -162,7 +162,6 @@ checkButton.addEventListener("click", () => {
     const c = idx % puzzle[0].length;
 
     let solved = true;
-    // Check if all cells in the word are correct
     if (isStartAcross(r,c)) {
       let i = 0;
       while (isWhiteCell(r,c+i)) {
