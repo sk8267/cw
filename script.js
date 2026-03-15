@@ -62,7 +62,7 @@ for(let r=0;r<puzzle.length;r++){
 
 // GLOBAL
 let currentWord = null;
-let userIsTyping = false; // Lock current word while typing
+let userIsTyping = false; // lock current word while typing
 
 // BUILD GRID
 for(let r=0;r<puzzle.length;r++){
@@ -95,12 +95,11 @@ for(let r=0;r<puzzle.length;r++){
     input.addEventListener("input",()=>{
       input.value=input.value.toUpperCase();
       moveFocus(input);
-      highlightWord();
     });
 
     // FOCUS
     input.addEventListener("focus",()=>{
-      if(userIsTyping){ highlightWord(); return; } // lock word direction while typing
+      if(userIsTyping) return; // lock word direction while typing
 
       const r=parseInt(input.dataset.row);
       const c=parseInt(input.dataset.col);
@@ -115,7 +114,6 @@ for(let r=0;r<puzzle.length;r++){
       if(isWhiteCell(tempR+1,c)){ startR=tempR; startC=c; dir="down"; }
 
       if(dir){ currentWord={row:startR,col:startC,direction:dir}; userIsTyping=true; }
-      highlightWord();
     });
   }
 }
@@ -155,7 +153,6 @@ showPictureClues();
 function focusClue(r,c,dir){
   currentWord={row:r,col:c,direction:dir};
   userIsTyping=true; // lock word
-  highlightWord();
   const cell=grid.querySelector(`input.cell[data-row='${r}'][data-col='${c}']`);
   if(cell) cell.focus();
 }
@@ -195,29 +192,6 @@ function moveFocus(currentInput){
   // finished word
   currentInput.focus();
   userIsTyping=false; // unlock after finishing word
-}
-
-// HIGHLIGHT WORD
-function highlightWord(){
-  document.querySelectorAll(".cell").forEach(cell=>cell.classList.remove("active-word"));
-  if(!currentWord) return;
-
-  const {row:r,col:c,direction:dir}=currentWord;
-  const cellsToHighlight=[];
-  if(dir==="across"){
-    let i=0; while(isWhiteCell(r,c+i)){
-      const cell=grid.querySelector(`input.cell[data-row='${r}'][data-col='${c+i}']`);
-      if(cell) cellsToHighlight.push(cell);
-      i++;
-    }
-  } else {
-    let i=0; while(isWhiteCell(r+i,c)){
-      const cell=grid.querySelector(`input.cell[data-row='${r+i}'][data-col='${c}']`);
-      if(cell) cellsToHighlight.push(cell);
-      i++;
-    }
-  }
-  cellsToHighlight.forEach(cell=>cell.classList.add("active-word"));
 }
 
 // CHECK BUTTON
