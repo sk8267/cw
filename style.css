@@ -111,3 +111,8 @@ button#checkButton:hover {
     margin-bottom: 20px;
   }
 }
+
+#crosswordContainer {
+  transform: scale(0.75);
+  transform-origin: top center;
+}
