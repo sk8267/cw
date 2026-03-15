@@ -89,24 +89,39 @@ for(let r=0;r<puzzle.length;r++){
     if(num!==null){
       const numberDiv = document.createElement("div");
       numberDiv.classList.add("clue-number");
-      numberDiv.textContent=num; // visible number
+      numberDiv.textContent=num;
       numberDiv.style.fontSize="14px";
       inputWrapper.appendChild(numberDiv);
     }
 
     grid.appendChild(inputWrapper);
 
+    // TYPING
     input.addEventListener("input",()=>{ 
       input.value=input.value.toUpperCase(); 
       moveFocus(input); 
     });
 
+    // FOCUS - highlight entire word, find word start
     input.addEventListener("focus", ()=>{
-      // set currentWord if cell is a word start
       const r=parseInt(input.dataset.row);
       const c=parseInt(input.dataset.col);
-      if(isStartAcross(r,c)) currentWord={row:r,col:c,direction:"across"};
-      else if(isStartDown(r,c)) currentWord={row:r,col:c,direction:"down"};
+
+      let startR = r;
+      let startC = c;
+      let dir = null;
+
+      // find Across start
+      let tempC = c;
+      while(isWhiteCell(r,tempC-1)) tempC--;
+      if(isWhiteCell(r,tempC+1)) { startC = tempC; dir="across"; }
+
+      // find Down start
+      let tempR = r;
+      while(isWhiteCell(tempR-1,c)) tempR--;
+      if(isWhiteCell(tempR+1,c)) { startR = tempR; startC=c; dir="down"; }
+
+      if(dir) currentWord = {row:startR, col:startC, direction:dir};
       highlightWord();
     });
   }
@@ -175,9 +190,8 @@ function moveFocus(currentInput){
   }
 }
 
-// HIGHLIGHT ACTIVE WORD
+// HIGHLIGHT ENTIRE ACTIVE WORD
 function highlightWord(){
-  // remove previous highlights
   document.querySelectorAll(".cell").forEach(cell=>{
     cell.classList.remove("active-word");
   });
