@@ -90,7 +90,8 @@ for (let r=0; r<puzzle.length; r++) {
     if (num !== null) {
       const numberDiv = document.createElement("div");
       numberDiv.classList.add("clue-number");
-      numberDiv.textContent = num;
+      numberDiv.textContent = num;  // visible number
+      numberDiv.style.fontSize = "14px"; 
       inputWrapper.appendChild(numberDiv);
     }
     grid.appendChild(inputWrapper);
