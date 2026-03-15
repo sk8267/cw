@@ -75,7 +75,7 @@ body {
 
 #pictureCluesAcross img,
 #pictureCluesDown img {
-  width: 20px;
+  width: 50px;
   height: auto;
   margin: 5px;
   cursor: pointer;
