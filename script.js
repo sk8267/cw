@@ -11,10 +11,10 @@ const puzzle = [
   ["#","#","#","#","#","#","U","#","T","#","S","P","R","I","N","G","#","S","#","#","#"],
   ["#","#","#","#","#","#","R","#","U","#","K","#","#","N","#","#","#","S","#","#","#"],
   ["#","#","#","B","#","#","C","#","L","#","E","A","S","T","E","R","#","B","#","#","#"],
-  ["J","E","S","U","S","C","H","R","I","S","T","#","#","G","#","#","#","U","#","#","#"],
+  ["J","E","S","U","S","C","H","R","I","S","T","#","#","E","#","#","#","U","#","#","#"],
   ["#","#","#","N","#","R","#","#","P","#","#","#","E","G","G","H","U","N","T","#","#"],
-  ["#","#","#","N","#","O","#","#","#","#","#","#","#","S","#","#","#","#","#","#","#"],
-  ["#","#","#","Y","#","S","#","#","#","#","#","#","#","#","#","#","#","#","#","#","#"],
+  ["#","#","#","N","#","O","#","#","#","#","#","#","#","G","#","#","#","#","#","#","#"],
+  ["#","#","#","Y","#","S","#","#","#","#","#","#","#","S","#","#","#","#","#","#","#"],
   ["#","#","#","#","#","S","#","#","#","#","#","#","#","#","#","#","#","#","#","#","#"]
 ];
 
@@ -48,11 +48,9 @@ grid.style.gridTemplateColumns = `repeat(${puzzle[0].length}, 40px)`;
 function isWhiteCell(r,c) {
   return r>=0 && r<puzzle.length && c>=0 && c<puzzle[0].length && puzzle[r][c]!=='#';
 }
-
 function isStartAcross(r,c) {
   return isWhiteCell(r,c) && !isWhiteCell(r,c-1) && isWhiteCell(r,c+1);
 }
-
 function isStartDown(r,c) {
   return isWhiteCell(r,c) && !isWhiteCell(r-1,c) && isWhiteCell(r+1,c);
 }
@@ -102,6 +100,15 @@ for(let r=0;r<puzzle.length;r++){
       input.value=input.value.toUpperCase(); 
       moveFocus(input); 
     });
+
+    input.addEventListener("focus", ()=>{
+      // set currentWord if cell is a word start
+      const r=parseInt(input.dataset.row);
+      const c=parseInt(input.dataset.col);
+      if(isStartAcross(r,c)) currentWord={row:r,col:c,direction:"across"};
+      else if(isStartDown(r,c)) currentWord={row:r,col:c,direction:"down"};
+      highlightWord();
+    });
   }
 }
 
@@ -139,12 +146,13 @@ showPictureClues();
 // FOCUS WORD WHEN IMAGE CLICKED
 function focusClue(r,c,dir){
   currentWord={row:r,col:c,direction:dir};
+  highlightWord();
 
   const cell = grid.querySelector(`input.cell[data-row='${r}'][data-col='${c}']`);
   if(cell) cell.focus();
 }
 
-// MOVE FOCUS ALONG CURRENT WORD ONLY
+// MOVE FOCUS ALONG CURRENT WORD AND SKIP FILLED LETTERS
 function moveFocus(currentInput){
   if(!currentWord) return;
   let {row:r,col:c,direction:dir}=currentWord;
@@ -152,16 +160,50 @@ function moveFocus(currentInput){
   r=parseInt(currentInput.dataset.row);
   c=parseInt(currentInput.dataset.col);
 
+  while(true){
+    if(dir==="across") c++;
+    else if(dir==="down") r++;
+    else return;
+
+    if(!isWhiteCell(r,c)) return;
+
+    const nextInput = grid.querySelector(`input.cell[data-row='${r}'][data-col='${c}']`);
+    if(nextInput && nextInput.value===""){ // stop at first empty
+      nextInput.focus();
+      break;
+    }
+  }
+}
+
+// HIGHLIGHT ACTIVE WORD
+function highlightWord(){
+  // remove previous highlights
+  document.querySelectorAll(".cell").forEach(cell=>{
+    cell.classList.remove("active-word");
+  });
+
+  if(!currentWord) return;
+
+  let {row:r, col:c, direction:dir} = currentWord;
+  const cellsToHighlight = [];
+
   if(dir==="across"){
-    c++;
-    if(!isWhiteCell(r,c)) return;
+    let i=0;
+    while(isWhiteCell(r,c+i)){
+      const cell = grid.querySelector(`input.cell[data-row='${r}'][data-col='${c+i}']`);
+      if(cell) cellsToHighlight.push(cell);
+      i++;
+    }
   } else if(dir==="down"){
-    r++;
-    if(!isWhiteCell(r,c)) return;
+    let i=0;
+    while(isWhiteCell(r+i,c)){
+      const cell = grid.querySelector(`input.cell[data-row='${r+i}'][data-col='${c}']`);
+      if(cell) cellsToHighlight.push(cell);
+      i++;
+    }
   }
 
-  const nextInput = grid.querySelector(`input.cell[data-row='${r}'][data-col='${c}']`);
-  if(nextInput) nextInput.focus();
+  cellsToHighlight.forEach(cell=>cell.classList.add("active-word"));
 }
 
 // CHECK ANSWERS
