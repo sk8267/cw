@@ -45,11 +45,6 @@ body {
   transition: background-color 0.3s ease;
 }
 
-.cell.active-word {
-  border: 2px solid #00796b; /* teal border */
-  background-color: #E0F7F4; /* light teal background */
-}
-
 .block {
   width: 40px;
   height: 40px;
