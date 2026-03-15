@@ -15,7 +15,7 @@ body {
   align-items: center;
   justify-content: center;
   gap: 30px;
-  margin-top: 5px;
+  margin-top: 0px;
 }
 
 
@@ -83,7 +83,7 @@ body {
 
 /* Check button */
 #controls {
-  margin-bottom: 5px;
+  margin-bottom: 0px;
   text-align: center;
 }
 
@@ -94,7 +94,7 @@ body {
   background-color: black;
   color: white;
   border: none;
-  border-radius: 12px;
+  border-radius: 20px;
   transition: background 0.3s;
 }
 
