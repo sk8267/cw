@@ -83,11 +83,21 @@ body {
 
 /* Check button */
 #controls {
-  margin-top: 15px;
+  margin-bottom: 5px;
+  text-align: center;
 }
 
 #checkButton {
   padding: 8px 16px;
   font-size: 16px;
   cursor: pointer;
+  background-color: black;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  transition: background 0.3s;
+}
+
+#checkButton:hover {
+  background-color: #333;
 }
