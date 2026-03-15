@@ -167,35 +167,38 @@ function focusClue(r,c,dir){
   if(cell) cell.focus();
 }
 
-// MOVE FOCUS (stays in current word)
+// MOVE FOCUS (intersection-safe)
 function moveFocus(currentInput){
   if(!currentWord) return;
+
   let {row:startR, col:startC, direction:dir} = currentWord;
 
-  let r = parseInt(currentInput.dataset.row);
-  let c = parseInt(currentInput.dataset.col);
-
-  while(true){
-    if(dir === "across") c++;
-    else if(dir === "down") r++;
-    else return;
-
-    if(!isWhiteCell(r,c)) return;
-
-    // end of current word
-    if(dir === "across"){
-      if(r!==startR) return;
-      let endC=startC; while(isWhiteCell(startR,endC+1)) endC++;
-      if(c > endC) return;
-    } else {
-      if(c!==startC) return;
-      let endR=startR; while(isWhiteCell(endR+1,startC)) endR++;
-      if(r > endR) return;
+  // build list of cells in current word
+  const wordCells = [];
+  if(dir==="across"){
+    let i=0;
+    while(isWhiteCell(startR,startC+i)){
+      const cell = grid.querySelector(`input.cell[data-row='${startR}'][data-col='${startC+i}']`);
+      if(cell) wordCells.push(cell);
+      i++;
     }
+  } else if(dir==="down"){
+    let i=0;
+    while(isWhiteCell(startR+i,startC)){
+      const cell = grid.querySelector(`input.cell[data-row='${startR+i}'][data-col='${startC}']`);
+      if(cell) wordCells.push(cell);
+      i++;
+    }
+  }
 
-    const nextInput = grid.querySelector(`input.cell[data-row='${r}'][data-col='${c}']`);
-    if(nextInput && nextInput.value===""){
-      nextInput.focus();
+  // find index of current input
+  const idx = wordCells.indexOf(currentInput);
+  if(idx === -1) return;
+
+  // move to next empty cell in the word
+  for(let next=idx+1; next<wordCells.length; next++){
+    if(wordCells[next].value===""){
+      wordCells[next].focus();
       break;
     }
   }
