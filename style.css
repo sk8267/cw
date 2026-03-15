@@ -70,7 +70,7 @@ body {
 
 .pictureClues img {
   border: 2px solid #ccc;
-  width: 100px;
+  width: 70px;
   cursor: pointer;
   transition: border-color 0.3s ease;
   user-select: none;
