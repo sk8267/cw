@@ -3,19 +3,28 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>Picture Clues Crossword</title>
+<title>Picture Crossword</title>
 <link rel="stylesheet" href="style.css" />
 </head>
 <body>
 
-<div id="grid"></div>
+<div id="crosswordContainer">
 
-<div id="pictureCluesContainer">
-  <h2>Across</h2>
-  <div id="pictureCluesAcross" class="pictureClues"></div>
+  <!-- Across pictures (left column) -->
+  <div id="acrossPicsContainer" class="picsColumn">
+    <div id="pictureCluesAcross" class="pictureClues"></div>
+  </div>
 
-  <h2>Down</h2>
-  <div id="pictureCluesDown" class="pictureClues"></div>
+  <!-- Crossword grid (middle) -->
+  <div id="gridContainer">
+    <div id="grid"></div>
+  </div>
+
+  <!-- Down pictures (right column) -->
+  <div id="downPicsContainer" class="picsColumn">
+    <div id="pictureCluesDown" class="pictureClues"></div>
+  </div>
+
 </div>
 
 <button id="checkButton">Check Answers</button>
