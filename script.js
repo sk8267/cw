@@ -100,6 +100,7 @@ for(let r=0;r<puzzle.length;r++){
     input.addEventListener("input",()=>{ 
       input.value=input.value.toUpperCase(); 
       moveFocus(input); 
+      highlightWord();
     });
 
     // FOCUS
@@ -111,12 +112,10 @@ for(let r=0;r<puzzle.length;r++){
       let startC = c;
       let dir = null;
 
-      // find Across start
       let tempC = c;
       while(isWhiteCell(r,tempC-1)) tempC--;
       if(isWhiteCell(r,tempC+1)) { startC = tempC; dir="across"; }
 
-      // find Down start
       let tempR = r;
       while(isWhiteCell(tempR-1,c)) tempR--;
       if(isWhiteCell(tempR+1,c)) { startR = tempR; startC=c; dir="down"; }
@@ -162,18 +161,15 @@ showPictureClues();
 function focusClue(r,c,dir){
   currentWord={row:r,col:c,direction:dir};
   highlightWord();
-
   const cell = grid.querySelector(`input.cell[data-row='${r}'][data-col='${c}']`);
   if(cell) cell.focus();
 }
 
-// MOVE FOCUS (intersection-safe)
+// MOVE FOCUS (intersection-safe, skips filled)
 function moveFocus(currentInput){
   if(!currentWord) return;
+  const {row:startR, col:startC, direction:dir} = currentWord;
 
-  let {row:startR, col:startC, direction:dir} = currentWord;
-
-  // build list of cells in current word
   const wordCells = [];
   if(dir==="across"){
     let i=0;
@@ -182,7 +178,7 @@ function moveFocus(currentInput){
       if(cell) wordCells.push(cell);
       i++;
     }
-  } else if(dir==="down"){
+  } else {
     let i=0;
     while(isWhiteCell(startR+i,startC)){
       const cell = grid.querySelector(`input.cell[data-row='${startR+i}'][data-col='${startC}']`);
@@ -191,17 +187,18 @@ function moveFocus(currentInput){
     }
   }
 
-  // find index of current input
   const idx = wordCells.indexOf(currentInput);
   if(idx === -1) return;
 
-  // move to next empty cell in the word
+  // Skip filled letters
   for(let next=idx+1; next<wordCells.length; next++){
     if(wordCells[next].value===""){
       wordCells[next].focus();
-      break;
+      return;
     }
   }
+  // Stay on last cell
+  currentInput.focus();
 }
 
 // HIGHLIGHT WORD
@@ -209,24 +206,23 @@ function highlightWord(){
   document.querySelectorAll(".cell").forEach(cell=>{
     cell.classList.remove("active-word");
   });
-
   if(!currentWord) return;
 
-  let {row:r, col:c, direction:dir} = currentWord;
+  const {row:r, col:c, direction:dir} = currentWord;
   const cellsToHighlight = [];
-
   if(dir==="across"){
     let i=0; while(isWhiteCell(r,c+i)){
-      const cell = grid.querySelector(`input.cell[data-row='${r}'][data-col='${c+i}']`);
-      if(cell) cellsToHighlight.push(cell); i++;
+      const cell=grid.querySelector(`input.cell[data-row='${r}'][data-col='${c+i}']`);
+      if(cell) cellsToHighlight.push(cell);
+      i++;
     }
   } else {
     let i=0; while(isWhiteCell(r+i,c)){
-      const cell = grid.querySelector(`input.cell[data-row='${r+i}'][data-col='${c}']`);
-      if(cell) cellsToHighlight.push(cell); i++;
+      const cell=grid.querySelector(`input.cell[data-row='${r+i}'][data-col='${c}']`);
+      if(cell) cellsToHighlight.push(cell);
+      i++;
     }
   }
-
   cellsToHighlight.forEach(cell=>cell.classList.add("active-word"));
 }
 
@@ -239,7 +235,6 @@ checkButton.addEventListener("click",()=>{
     const c=parseInt(cell.dataset.col);
     const answer=puzzle[r][c];
     const guess=cell.value.toUpperCase();
-
     if(guess===answer) cell.style.backgroundColor="#90EE90";
     else if(guess.length>0) cell.style.backgroundColor="#FFB6B6";
     else cell.style.backgroundColor="";
