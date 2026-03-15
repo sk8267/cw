@@ -44,7 +44,7 @@ const checkButton = document.getElementById("checkButton");
 
 grid.style.gridTemplateColumns = `repeat(${puzzle[0].length}, 40px)`;
 
-// UTILITY
+// UTILITY FUNCTIONS
 function isWhiteCell(r,c) {
   return r>=0 && r<puzzle.length && c>=0 && c<puzzle[0].length && puzzle[r][c]!=='#';
 }
@@ -66,7 +66,7 @@ for(let r=0;r<puzzle.length;r++){
   }
 }
 
-// GLOBAL
+// GLOBAL TO TRACK CURRENT WORD
 let currentWord = null;
 
 // BUILD GRID
@@ -89,44 +89,30 @@ for(let r=0;r<puzzle.length;r++){
     if(num!==null){
       const numberDiv = document.createElement("div");
       numberDiv.classList.add("clue-number");
-      numberDiv.textContent=num;
+      numberDiv.textContent=num; // visible number
       numberDiv.style.fontSize="14px";
       inputWrapper.appendChild(numberDiv);
     }
 
     grid.appendChild(inputWrapper);
 
-    // TYPING
     input.addEventListener("input",()=>{ 
       input.value=input.value.toUpperCase(); 
       moveFocus(input); 
-      highlightWord();
     });
 
-    // FOCUS
     input.addEventListener("focus", ()=>{
+      // set currentWord if cell is a word start
       const r=parseInt(input.dataset.row);
       const c=parseInt(input.dataset.col);
-
-      let startR = r;
-      let startC = c;
-      let dir = null;
-
-      let tempC = c;
-      while(isWhiteCell(r,tempC-1)) tempC--;
-      if(isWhiteCell(r,tempC+1)) { startC = tempC; dir="across"; }
-
-      let tempR = r;
-      while(isWhiteCell(tempR-1,c)) tempR--;
-      if(isWhiteCell(tempR+1,c)) { startR = tempR; startC=c; dir="down"; }
-
-      if(dir) currentWord = {row:startR, col:startC, direction:dir};
+      if(isStartAcross(r,c)) currentWord={row:r,col:c,direction:"across"};
+      else if(isStartDown(r,c)) currentWord={row:r,col:c,direction:"down"};
       highlightWord();
     });
   }
 }
 
-// PICTURE CLUES
+// SHOW PICTURE CLUES
 function showPictureClues(){
   acrossPicsDiv.innerHTML="";
   downPicsDiv.innerHTML="";
@@ -157,76 +143,70 @@ function showPictureClues(){
 }
 showPictureClues();
 
-// FOCUS WORD
+// FOCUS WORD WHEN IMAGE CLICKED
 function focusClue(r,c,dir){
   currentWord={row:r,col:c,direction:dir};
   highlightWord();
+
   const cell = grid.querySelector(`input.cell[data-row='${r}'][data-col='${c}']`);
   if(cell) cell.focus();
 }
 
-// MOVE FOCUS (intersection-safe, skips filled)
+// MOVE FOCUS ALONG CURRENT WORD AND SKIP FILLED LETTERS
 function moveFocus(currentInput){
   if(!currentWord) return;
-  const {row:startR, col:startC, direction:dir} = currentWord;
+  let {row:r,col:c,direction:dir}=currentWord;
 
-  const wordCells = [];
-  if(dir==="across"){
-    let i=0;
-    while(isWhiteCell(startR,startC+i)){
-      const cell = grid.querySelector(`input.cell[data-row='${startR}'][data-col='${startC+i}']`);
-      if(cell) wordCells.push(cell);
-      i++;
-    }
-  } else {
-    let i=0;
-    while(isWhiteCell(startR+i,startC)){
-      const cell = grid.querySelector(`input.cell[data-row='${startR+i}'][data-col='${startC}']`);
-      if(cell) wordCells.push(cell);
-      i++;
-    }
-  }
+  r=parseInt(currentInput.dataset.row);
+  c=parseInt(currentInput.dataset.col);
 
-  const idx = wordCells.indexOf(currentInput);
-  if(idx === -1) return;
+  while(true){
+    if(dir==="across") c++;
+    else if(dir==="down") r++;
+    else return;
 
-  // Skip filled letters
-  for(let next=idx+1; next<wordCells.length; next++){
-    if(wordCells[next].value===""){
-      wordCells[next].focus();
-      return;
+    if(!isWhiteCell(r,c)) return;
+
+    const nextInput = grid.querySelector(`input.cell[data-row='${r}'][data-col='${c}']`);
+    if(nextInput && nextInput.value===""){ // stop at first empty
+      nextInput.focus();
+      break;
     }
   }
-  // Stay on last cell
-  currentInput.focus();
 }
 
-// HIGHLIGHT WORD
+// HIGHLIGHT ACTIVE WORD
 function highlightWord(){
+  // remove previous highlights
   document.querySelectorAll(".cell").forEach(cell=>{
     cell.classList.remove("active-word");
   });
+
   if(!currentWord) return;
 
-  const {row:r, col:c, direction:dir} = currentWord;
+  let {row:r, col:c, direction:dir} = currentWord;
   const cellsToHighlight = [];
+
   if(dir==="across"){
-    let i=0; while(isWhiteCell(r,c+i)){
-      const cell=grid.querySelector(`input.cell[data-row='${r}'][data-col='${c+i}']`);
+    let i=0;
+    while(isWhiteCell(r,c+i)){
+      const cell = grid.querySelector(`input.cell[data-row='${r}'][data-col='${c+i}']`);
       if(cell) cellsToHighlight.push(cell);
       i++;
     }
-  } else {
-    let i=0; while(isWhiteCell(r+i,c)){
-      const cell=grid.querySelector(`input.cell[data-row='${r+i}'][data-col='${c}']`);
+  } else if(dir==="down"){
+    let i=0;
+    while(isWhiteCell(r+i,c)){
+      const cell = grid.querySelector(`input.cell[data-row='${r+i}'][data-col='${c}']`);
       if(cell) cellsToHighlight.push(cell);
       i++;
     }
   }
+
   cellsToHighlight.forEach(cell=>cell.classList.add("active-word"));
 }
 
-// CHECK BUTTON
+// CHECK ANSWERS
 checkButton.addEventListener("click",()=>{
   const cells=document.querySelectorAll(".cell");
 
@@ -235,6 +215,7 @@ checkButton.addEventListener("click",()=>{
     const c=parseInt(cell.dataset.col);
     const answer=puzzle[r][c];
     const guess=cell.value.toUpperCase();
+
     if(guess===answer) cell.style.backgroundColor="#90EE90";
     else if(guess.length>0) cell.style.backgroundColor="#FFB6B6";
     else cell.style.backgroundColor="";
@@ -250,7 +231,8 @@ checkButton.addEventListener("click",()=>{
     let solved=true;
 
     if(isStartAcross(r,c)){
-      let i=0; while(isWhiteCell(r,c+i)){
+      let i=0;
+      while(isWhiteCell(r,c+i)){
         const cell=grid.querySelector(`input.cell[data-row='${r}'][data-col='${c+i}']`);
         if(!cell || cell.value.toUpperCase()!==puzzle[r][c+i]) solved=false;
         i++;
@@ -258,7 +240,8 @@ checkButton.addEventListener("click",()=>{
     }
 
     if(isStartDown(r,c)){
-      let i=0; while(isWhiteCell(r+i,c)){
+      let i=0;
+      while(isWhiteCell(r+i,c)){
         const cell=grid.querySelector(`input.cell[data-row='${r+i}'][data-col='${c}']`);
         if(!cell || cell.value.toUpperCase()!==puzzle[r+i][c]) solved=false;
         i++;
