@@ -1,34 +1,38 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>Picture Crossword</title>
-<link rel="stylesheet" href="style.css" />
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Crossword Puzzle</title>
+
+  <!-- Link to CSS -->
+  <link rel="stylesheet" href="style.css">
 </head>
+
 <body>
 
-<div id="crosswordContainer">
+  <!-- Crossword container (used to scale the puzzle smaller) -->
+  <div id="crosswordContainer">
 
-  <!-- Across pictures (left column) -->
-  <div id="acrossPicsContainer" class="picsColumn">
-    <div id="pictureCluesAcross" class="pictureClues"></div>
-  </div>
+    <!-- Across picture clues -->
+    <div id="pictureCluesAcross"></div>
 
-  <!-- Crossword grid (middle) -->
-  <div id="gridContainer">
+    <!-- Crossword grid -->
     <div id="grid"></div>
+
+    <!-- Down picture clues -->
+    <div id="pictureCluesDown"></div>
+
+    <!-- Check button -->
+    <div id="controls">
+      <button id="checkButton">Check</button>
+    </div>
+
   </div>
 
-  <!-- Down pictures (right column) -->
-  <div id="downPicsContainer" class="picsColumn">
-    <div id="pictureCluesDown" class="pictureClues"></div>
-  </div>
+  <!-- Link to JavaScript -->
+  <script src="script.js"></script>
 
-</div>
-
-<button id="checkButton">Check Answers</button>
-
-<script src="script.js"></script>
 </body>
 </html>
