@@ -3,26 +3,21 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>Interactive Crossword with Picture Clues</title>
+<title>Picture Clues Crossword</title>
 <link rel="stylesheet" href="style.css" />
 </head>
 <body>
 
-<h1>Interactive Crossword Puzzle</h1>
+<h1>Picture Crossword Puzzle</h1>
 
 <div id="grid"></div>
 
-<div id="clues">
-
+<div id="pictureCluesContainer">
   <h2>Across</h2>
-  <ul id="across"></ul>
+  <div id="pictureCluesAcross" class="pictureClues"></div>
 
   <h2>Down</h2>
-  <ul id="down"></ul>
-
-  <!-- Picture clues will appear here -->
-  <div id="pictureClues"></div>
-
+  <div id="pictureCluesDown" class="pictureClues"></div>
 </div>
 
 <button id="checkButton">Check Answers</button>
