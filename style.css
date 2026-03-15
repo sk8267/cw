@@ -7,16 +7,14 @@ body {
   color: #333;
 }
 
-h1 {
+h1, h2 {
   text-align: center;
-  margin-bottom: 30px;
 }
 
 #grid {
   display: grid;
   gap: 2px;
   margin: 0 auto 30px;
-  user-select: none;
 }
 
 .cell {
@@ -48,51 +46,22 @@ h1 {
   pointer-events: none;
 }
 
-#clues {
-  max-width: 600px;
-  margin: 0 auto 20px;
-}
-
-#clues h2 {
-  margin-bottom: 5px;
-  border-bottom: 1px solid #ddd;
-  padding-bottom: 3px;
-}
-
-#clues ul {
-  list-style-type: none;
-  padding-left: 10px;
-  margin-bottom: 20px;
-}
-
-#clues li {
-  margin-bottom: 6px;
-  cursor: pointer;
-  user-select: none;
-}
-
-#clues li:hover {
-  color: #00796b;
-  font-weight: bold;
-}
-
-#pictureClues {
-  margin-top: 20px;
+.pictureClues {
   display: flex;
   flex-wrap: wrap;
-  gap: 10px;
   justify-content: center;
+  gap: 10px;
+  margin-bottom: 30px;
 }
 
-#pictureClues img {
+.pictureClues img {
   border: 2px solid #ccc;
   width: 100px;
   cursor: pointer;
   transition: border-color 0.3s ease;
-  user-select: none;
 }
 
-#pictureClues img:hover {
+.pictureClues img:hover {
   border-color: #00796b;
 }
 
