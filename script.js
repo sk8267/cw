@@ -20,11 +20,20 @@ const puzzle = [
 
 // PICTURE CLUES BY CLUE NUMBER
 const pictureClues = {
-  1: "https://i.imgur.com/3hVvYqM.png",
-  2: "https://i.imgur.com/tYuKcwZ.png",
-  3: "https://i.imgur.com/6Q9qHls.png",
-  4: "https://i.imgur.com/vDLtBd5.png",
-  5: "https://i.imgur.com/ei82TBl.png"
+  1: "images/hotcrossbun.jpg",
+  2: "images/daffodil.jpg",
+  3: "images/lamb.jpg",
+  4: "images/chick.jpg",
+  5: "images/church.jpg",
+  6: "images/basket.jpg",
+  7: "images/painteggs.jpg",
+  8: "images/tulip.jpg",
+  9: "images/spring.jpg",
+  10: "images/bunny.jpg",
+  11: "images/easter.jpg",
+  12: "images/jesuschrist.jpg",
+  13: "images/cross.jpg",
+  14: "images/egghunt.jpg"
 };
 
 // DOM ELEMENTS
