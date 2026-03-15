@@ -44,20 +44,14 @@ const checkButton = document.getElementById("checkButton");
 
 grid.style.gridTemplateColumns = `repeat(${puzzle[0].length}, 40px)`;
 
-// UTILITY FUNCTIONS
-function isWhiteCell(r,c) {
-  return r>=0 && r<puzzle.length && c>=0 && c<puzzle[0].length && puzzle[r][c]!=='#';
-}
-function isStartAcross(r,c) {
-  return isWhiteCell(r,c) && !isWhiteCell(r,c-1) && isWhiteCell(r,c+1);
-}
-function isStartDown(r,c) {
-  return isWhiteCell(r,c) && !isWhiteCell(r-1,c) && isWhiteCell(r+1,c);
-}
+// UTILITY
+function isWhiteCell(r,c){ return r>=0 && r<puzzle.length && c>=0 && c<puzzle[0].length && puzzle[r][c]!=='#'; }
+function isStartAcross(r,c){ return isWhiteCell(r,c) && !isWhiteCell(r,c-1) && isWhiteCell(r,c+1); }
+function isStartDown(r,c){ return isWhiteCell(r,c) && !isWhiteCell(r-1,c) && isWhiteCell(r+1,c); }
 
-// NUMBERING GRID
-const numbering = [];
-let clueNumber = 1;
+// NUMBERING
+const numbering=[];
+let clueNumber=1;
 for(let r=0;r<puzzle.length;r++){
   for(let c=0;c<puzzle[0].length;c++){
     if(puzzle[r][c]==='#'){ numbering.push(null); continue; }
@@ -66,8 +60,9 @@ for(let r=0;r<puzzle.length;r++){
   }
 }
 
-// GLOBAL TO TRACK CURRENT WORD
+// GLOBAL
 let currentWord = null;
+let userIsTyping = false; // Lock current word while typing
 
 // BUILD GRID
 for(let r=0;r<puzzle.length;r++){
@@ -84,50 +79,63 @@ for(let r=0;r<puzzle.length;r++){
     input.dataset.col=c;
     inputWrapper.appendChild(input);
 
-    const idx = r*puzzle[0].length+c;
-    const num = numbering[idx];
+    const idx=r*puzzle[0].length+c;
+    const num=numbering[idx];
     if(num!==null){
-      const numberDiv = document.createElement("div");
+      const numberDiv=document.createElement("div");
       numberDiv.classList.add("clue-number");
-      numberDiv.textContent=num; // visible number
+      numberDiv.textContent=num;
       numberDiv.style.fontSize="14px";
       inputWrapper.appendChild(numberDiv);
     }
 
     grid.appendChild(inputWrapper);
 
-    input.addEventListener("input",()=>{ 
-      input.value=input.value.toUpperCase(); 
-      moveFocus(input); 
+    // TYPING
+    input.addEventListener("input",()=>{
+      input.value=input.value.toUpperCase();
+      moveFocus(input);
+      highlightWord();
     });
 
-    input.addEventListener("focus", ()=>{
-      // set currentWord if cell is a word start
+    // FOCUS
+    input.addEventListener("focus",()=>{
+      if(userIsTyping){ highlightWord(); return; } // lock word direction while typing
+
       const r=parseInt(input.dataset.row);
       const c=parseInt(input.dataset.col);
-      if(isStartAcross(r,c)) currentWord={row:r,col:c,direction:"across"};
-      else if(isStartDown(r,c)) currentWord={row:r,col:c,direction:"down"};
+      let startR=r, startC=c, dir=null;
+
+      let tempC=c;
+      while(isWhiteCell(r,tempC-1)) tempC--;
+      if(isWhiteCell(r,tempC+1)){ startC=tempC; dir="across"; }
+
+      let tempR=r;
+      while(isWhiteCell(tempR-1,c)) tempR--;
+      if(isWhiteCell(tempR+1,c)){ startR=tempR; startC=c; dir="down"; }
+
+      if(dir){ currentWord={row:startR,col:startC,direction:dir}; userIsTyping=true; }
       highlightWord();
     });
   }
 }
 
-// SHOW PICTURE CLUES
+// PICTURE CLUES
 function showPictureClues(){
   acrossPicsDiv.innerHTML="";
   downPicsDiv.innerHTML="";
 
   numbering.forEach((num,idx)=>{
     if(!num || !pictureClues[num]) return;
-    const r = Math.floor(idx/puzzle[0].length);
-    const c = idx%puzzle[0].length;
+    const r=Math.floor(idx/puzzle[0].length);
+    const c=idx%puzzle[0].length;
 
     if(isStartAcross(r,c)){
       const img=document.createElement("img");
       img.src=pictureClues[num];
       img.dataset.num=num;
       img.dataset.direction="across";
-      img.addEventListener("click",()=>focusClue(r,c,img.dataset.direction));
+      img.addEventListener("click",()=>focusClue(r,c,"across"));
       acrossPicsDiv.appendChild(img);
     }
 
@@ -136,77 +144,83 @@ function showPictureClues(){
       img.src=pictureClues[num];
       img.dataset.num=num;
       img.dataset.direction="down";
-      img.addEventListener("click",()=>focusClue(r,c,img.dataset.direction));
+      img.addEventListener("click",()=>focusClue(r,c,"down"));
       downPicsDiv.appendChild(img);
     }
   });
 }
 showPictureClues();
 
-// FOCUS WORD WHEN IMAGE CLICKED
+// FOCUS WORD
 function focusClue(r,c,dir){
   currentWord={row:r,col:c,direction:dir};
+  userIsTyping=true; // lock word
   highlightWord();
-
-  const cell = grid.querySelector(`input.cell[data-row='${r}'][data-col='${c}']`);
+  const cell=grid.querySelector(`input.cell[data-row='${r}'][data-col='${c}']`);
   if(cell) cell.focus();
 }
 
-// MOVE FOCUS ALONG CURRENT WORD AND SKIP FILLED LETTERS
+// MOVE FOCUS (intersection-safe)
 function moveFocus(currentInput){
   if(!currentWord) return;
-  let {row:r,col:c,direction:dir}=currentWord;
+  const {row:startR,col:startC,direction:dir}=currentWord;
 
-  r=parseInt(currentInput.dataset.row);
-  c=parseInt(currentInput.dataset.col);
-
-  while(true){
-    if(dir==="across") c++;
-    else if(dir==="down") r++;
-    else return;
-
-    if(!isWhiteCell(r,c)) return;
-
-    const nextInput = grid.querySelector(`input.cell[data-row='${r}'][data-col='${c}']`);
-    if(nextInput && nextInput.value===""){ // stop at first empty
-      nextInput.focus();
-      break;
-    }
-  }
-}
-
-// HIGHLIGHT ACTIVE WORD
-function highlightWord(){
-  // remove previous highlights
-  document.querySelectorAll(".cell").forEach(cell=>{
-    cell.classList.remove("active-word");
-  });
-
-  if(!currentWord) return;
-
-  let {row:r, col:c, direction:dir} = currentWord;
-  const cellsToHighlight = [];
-
+  const wordCells=[];
   if(dir==="across"){
     let i=0;
-    while(isWhiteCell(r,c+i)){
-      const cell = grid.querySelector(`input.cell[data-row='${r}'][data-col='${c+i}']`);
-      if(cell) cellsToHighlight.push(cell);
+    while(isWhiteCell(startR,startC+i)){
+      const cell=grid.querySelector(`input.cell[data-row='${startR}'][data-col='${startC+i}']`);
+      if(cell) wordCells.push(cell);
       i++;
     }
-  } else if(dir==="down"){
+  } else {
     let i=0;
-    while(isWhiteCell(r+i,c)){
-      const cell = grid.querySelector(`input.cell[data-row='${r+i}'][data-col='${c}']`);
-      if(cell) cellsToHighlight.push(cell);
+    while(isWhiteCell(startR+i,startC)){
+      const cell=grid.querySelector(`input.cell[data-row='${startR+i}'][data-col='${startC}']`);
+      if(cell) wordCells.push(cell);
       i++;
     }
   }
 
+  const idx=wordCells.indexOf(currentInput);
+  if(idx===-1) return;
+
+  for(let next=idx+1;next<wordCells.length;next++){
+    if(wordCells[next].value===""){
+      wordCells[next].focus();
+      return;
+    }
+  }
+
+  // finished word
+  currentInput.focus();
+  userIsTyping=false; // unlock after finishing word
+}
+
+// HIGHLIGHT WORD
+function highlightWord(){
+  document.querySelectorAll(".cell").forEach(cell=>cell.classList.remove("active-word"));
+  if(!currentWord) return;
+
+  const {row:r,col:c,direction:dir}=currentWord;
+  const cellsToHighlight=[];
+  if(dir==="across"){
+    let i=0; while(isWhiteCell(r,c+i)){
+      const cell=grid.querySelector(`input.cell[data-row='${r}'][data-col='${c+i}']`);
+      if(cell) cellsToHighlight.push(cell);
+      i++;
+    }
+  } else {
+    let i=0; while(isWhiteCell(r+i,c)){
+      const cell=grid.querySelector(`input.cell[data-row='${r+i}'][data-col='${c}']`);
+      if(cell) cellsToHighlight.push(cell);
+      i++;
+    }
+  }
   cellsToHighlight.forEach(cell=>cell.classList.add("active-word"));
 }
 
-// CHECK ANSWERS
+// CHECK BUTTON
 checkButton.addEventListener("click",()=>{
   const cells=document.querySelectorAll(".cell");
 
@@ -215,7 +229,6 @@ checkButton.addEventListener("click",()=>{
     const c=parseInt(cell.dataset.col);
     const answer=puzzle[r][c];
     const guess=cell.value.toUpperCase();
-
     if(guess===answer) cell.style.backgroundColor="#90EE90";
     else if(guess.length>0) cell.style.backgroundColor="#FFB6B6";
     else cell.style.backgroundColor="";
@@ -231,8 +244,7 @@ checkButton.addEventListener("click",()=>{
     let solved=true;
 
     if(isStartAcross(r,c)){
-      let i=0;
-      while(isWhiteCell(r,c+i)){
+      let i=0; while(isWhiteCell(r,c+i)){
         const cell=grid.querySelector(`input.cell[data-row='${r}'][data-col='${c+i}']`);
         if(!cell || cell.value.toUpperCase()!==puzzle[r][c+i]) solved=false;
         i++;
@@ -240,8 +252,7 @@ checkButton.addEventListener("click",()=>{
     }
 
     if(isStartDown(r,c)){
-      let i=0;
-      while(isWhiteCell(r+i,c)){
+      let i=0; while(isWhiteCell(r+i,c)){
         const cell=grid.querySelector(`input.cell[data-row='${r+i}'][data-col='${c}']`);
         if(!cell || cell.value.toUpperCase()!==puzzle[r+i][c]) solved=false;
         i++;
